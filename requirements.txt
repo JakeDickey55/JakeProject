@@ -1,0 +1,45 @@
+psycopg2
+requests
+python-dotenv  # if you want to use .env files
+pandas         # if you need to do data manipulation
+schedule       # if you want to schedule tasks
+flask
+
+FROM alpine:3.19
+
+RUN apk update \ 
+&& apk add \
+--no-cache \
+--update-cache \
+    sudo \
+    bash \
+    build-base \
+    curl \
+    docker \
+    git \
+    nmap \
+    python3 \
+    py3-aiohttp \
+    py3-dotenv \
+    py3-pip \
+    py3-requests \
+    py3-yaml \
+&& pip3 install --break-system-packages\
+    celery[redis] \
+    docker \
+    fastapi \
+    httpx \
+    influxdb-client \
+    pandas \
+    pexpect \
+    pymetasploit3 \
+    psycopg2-binary \
+    pydantic \
+    schedule \
+    uvicorn \
+&& rm -rf /var/cache/apk/*
+
+WORKDIR /app
+EXPOSE 80
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD [ "python3","./src" ]

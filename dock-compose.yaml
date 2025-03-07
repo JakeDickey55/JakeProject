@@ -1,0 +1,27 @@
+name: jakecrypto
+
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_DB
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: crypto_DB
+  #volumes:
+    #- ./init.sql:/docker-entrypoint-initdb.d/init.sql  
+    # empty currently cause using an API to get data
+  app:
+    build: .
+    container_name: python_app
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    command: python3 app.py
+    environment:
+      DATABASE_URL: postgres://myuser:password@postgres:5432/crypto_DB

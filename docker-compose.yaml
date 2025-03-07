@@ -1,0 +1,52 @@
+name: jakecrypto
+
+version: '27.3.1'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_DB
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: crypto_DB
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  data_fetcher:
+    build:
+      context: .
+    container_name: crypto_fetcher
+    command: python3 app.py
+    environment:
+      DATABASE_URL: postgresql://myuser:password@postgres:5432/crypto_DB
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+
+  api:
+    build:
+      context: .
+    container_name: crypto_api
+    command: uvicorn API:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql://myuser:password@postgres:5432/crypto_DB
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+  clips:
+    build:
+      context: .
+    container_name: clips_rules_engine
+    volumes:
+      - ./test.clp:/app/test.clp
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://myuser:password@postgres:5432/crypto_DB
